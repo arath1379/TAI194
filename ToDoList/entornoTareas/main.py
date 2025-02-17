@@ -38,3 +38,13 @@ def CrearNuevaTarea(tarea: dict):
         raise HTTPException(status_code=400,detail="La tarea ya existe")
     tareas.append(tarea)
     return tarea
+
+#EndPoint para actualizar una tarea
+@app.put('/tareas{id}',tags=['Gestion Tareas'])
+def ActualizarTarea(id:int,TareaActualizada:dict):
+    for index, tarea in enumerate(tareas):
+        if tarea['id'] == id:
+            tareas[index].update(TareaActualizada)
+            return tareas[index]
+    raise HTTPException(status_code=400,detail="La tarea no existe")
+
