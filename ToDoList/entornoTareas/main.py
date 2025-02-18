@@ -32,10 +32,10 @@ def ObtenerTareaEspecifica(id: int):
 #EndPoint para Crear una nueva tarea.
 @app.post('/tareas',tags=['Gestion Tareas'])
 def CrearNuevaTarea(tarea: dict):
-    for tarea in tareas:
-        if tarea['id'] == id:
-            return {'Tarea': tarea}
-        raise HTTPException(status_code=400,detail="La tarea ya existe")
+    for tar in tareas:
+        if tar['id'] == tarea.get('id'):
+
+            raise HTTPException(status_code=400,detail="La tarea ya existe")
     tareas.append(tarea)
     return tarea
 
@@ -53,6 +53,6 @@ def ActualizarTarea(id:int,TareaActualizada:dict):
 def EliminarTarea(id:int):
     for index, tarea in enumerate(tareas):
         if tarea['id'] == id:
-            tareas.pop(index)
-            return {'Tarea Eliminada': tareas(index)}
+            return tareas.pop(index)
     raise HTTPException(status_code=400,detail="La tarea no existe")
+
