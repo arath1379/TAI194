@@ -40,7 +40,7 @@ def CrearNuevaTarea(tarea: dict):
     return tarea
 
 #EndPoint para actualizar una tarea
-@app.put('/tareas{id}',tags=['Gestion Tareas'])
+@app.put('/tareas/{id}',tags=['Gestion Tareas'])
 def ActualizarTarea(id:int,TareaActualizada:dict):
     for index, tarea in enumerate(tareas):
         if tarea['id'] == id:
@@ -49,7 +49,7 @@ def ActualizarTarea(id:int,TareaActualizada:dict):
     raise HTTPException(status_code=400,detail="La tarea no existe")
 
 #EndPoint para eliminar una tarea
-@app.delete('/tareas{id}',tags=['Gestion Tareas'])
+@app.delete('/tareas/{id}',tags=['Gestion Tareas'])
 def EliminarTarea(id:int):
     for index, tarea in enumerate(tareas):
         if tarea['id'] == id:
