@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
-from typing import Optional
+from typing import Optional, List
+from pydantic import BaseModel
 
 app= FastAPI(
     title="Mi primer API",
@@ -7,11 +8,17 @@ app= FastAPI(
     version="1.0.0",
 )
 
+class modelUsuario(BaseModel):
+    id: int
+    nombre: str
+    edad: int
+    correo: str
+
 usuarios=[
-    {"id":1,"nombre":"Arath","edad":20},
-    {"id":2,"nombre":"Josue","edad":22},
-    {"id":3,"nombre":"Jacinto","edad":25},
-    {"id":4,"nombre":"Abraham","edad":36}
+    {"id":1,"nombre":"Arath","edad":20,"correo":"arath@example.com"},
+    {"id":2,"nombre":"Josue","edad":22,"correo":"josue@example.com"},
+    {"id":3,"nombre":"Jacinto","edad":25,"correo":"jaci@example.com"},
+    {"id":4,"nombre":"Joel","edad":21,"correo":"joel@example.com"}
 ]
 
 #ruta o ENDPOINT
@@ -20,25 +27,25 @@ def home():
     return {'hello': 'world fastApi'}
 
 #ENDPOINTConsulta Todos
-@app.get('/todosUsuarios',tags=['Operaciones CRUD'])
+@app.get('/todosUsuarios',response_model=List[modelUsuario],tags=['Operaciones CRUD'])
 def leer():
-    return {'Usuarios Registrados': usuarios}
+    return usuarios
 
 #ENDPOINT POST
-@app.post('/usuarios/',tags=['Operaciones CRUD'])
-def guardar(usuario:dict):
+@app.post('/usuarios/',response_model=modelUsuario,tags=['Operaciones CRUD'])
+def guardar(usuario:modelUsuario):
     for usr in usuarios:
-        if usr['id'] == usuario.get('id'):
+        if usr['id'] == usuario.id:
             raise HTTPException(status_code=400,detail="El usuario ya existe")
     usuarios.append(usuario)
     return usuario
 
 #ENDPOINT para actualizar
-@app.put('/usuarios/{id}',tags=['Operaciones CRUD'])
-def actualizar(id:int,usuarioActualizado:dict):
+@app.put('/usuarios/{id}',response_model=modelUsuario,tags=['Operaciones CRUD'])
+def actualizar(id:int,usuarioActualizado:modelUsuario):
     for index, usr in enumerate(usuarios):
         if usr['id'] == id:
-            usuarios[index].update(usuarioActualizado)
+            usuarios[index]== usuarioActualizado.model_dump()
             return usuarios[index]
     raise HTTPException(status_code=400,detail="El usuario no existe")
 
