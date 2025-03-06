@@ -1,8 +1,9 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from typing import Optional, List
 from models import modelUsuario
 from models import modelAuth
 from genToken import createToken
+from middlewares import BearerJWT
 
 app = FastAPI(
     title="Mi primer API",
@@ -33,7 +34,7 @@ def auth(credenciales: modelAuth):
         return {"Aviso": "Usuario no cuenta con permiso"}
 
 # ENDPOINT - Obtener todos los usuarios
-@app.get("/todosUsuarios", response_model=List[modelUsuario], tags=["Operaciones CRUD"])
+@app.get("/todosUsuarios", dependencies=[Depends(BearerJWT())],response_model=List[modelUsuario], tags=["Operaciones CRUD"])
 def leer():
     return usuarios
 
