@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.responses import JSONResponse
 from typing import Optional, List
 from models import modelUsuario
 from models import modelAuth
@@ -29,7 +30,7 @@ def auth(credenciales: modelAuth):
     if credenciales.mail == "arath@example.com" and credenciales.passw == "123456789":
         token: str = createToken(credenciales.model_dump())
         print(token)
-        return {"Aviso": "Token generado"}
+        return JSONResponse(content=token)
     else:
         return {"Aviso": "Usuario no cuenta con permiso"}
 
