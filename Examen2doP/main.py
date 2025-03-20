@@ -10,9 +10,9 @@ app = FastAPI(
 
 # Lista de vehículos
 vehiculos = [
-    {"id": 1, "modelo": "Corolla", "año": 2020, "placa": "2Gytsa8AS"},
-    {"id": 2, "modelo": "Civic", "año": 2019, "placa": "Hgb6689VC"},
-    {"id": 3, "modelo": "Sentra", "año": 2018, "placa": "H98BNjgO88"}
+    {"id_vehiculo": 1, "modelo": "Corolla", "año": 2020, "placa": "2Gytsa8AS"},
+    {"id_vehiculo": 2, "modelo": "Civic", "año": 2019, "placa": "Hgb6689VC"},
+    {"id_vehiculo": 3, "modelo": "Sentra", "año": 2018, "placa": "H98BNjgO88"}
 ]
 
 # Obtener todos los vehículos
@@ -30,7 +30,7 @@ def crear_vehiculo(vehiculo: modelVehiculo):
 @app.put("/vehiculos/{id}", response_model=modelVehiculo, tags=["Vehiculos"])
 async def actualizar_vehiculo(id: int, vehiculo: modelVehiculo):
     for v in vehiculos:
-        if v["id"] == id:
+        if v["id_vehiculo"] == id:
             v["modelo"] = vehiculo.modelo
             v["año"] = vehiculo.año
             v["placa"] = vehiculo.placa
