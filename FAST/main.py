@@ -5,12 +5,16 @@ from modelsPydantic import modelUsuario
 from modelsPydantic import modelAuth
 from genToken import createToken
 from middlewares import BearerJWT
+from DB.conexion import Session, engine, Base
+from models.modelsDB import User
 
 app = FastAPI(
     title="Mi primer API",
     description="Arath Josue Perez Campos",
     version="1.0.0",
 )
+
+Base.metadata.create_all(bind=engine)
 
 usuarios = [
     {"id": 1, "nombre": "Arath", "edad": 20, "correo": "arath@example.com"},
@@ -42,11 +46,23 @@ def leer():
 # ENDPOINT - Agregar usuario
 @app.post("/usuarios/", response_model=modelUsuario, tags=["Operaciones CRUD"])
 def guardar(usuario: modelUsuario):
-    for usr in usuarios:
-        if usr["id"] == usuario.id:
-            raise HTTPException(status_code=400, detail="El usuario ya existe")
-    usuarios.append(usuario.model_dump())
-    return usuario
+    db = Session()
+    try:
+        nuevo_usuario = User(**usuario.model_dump())  # Desempaqueta el diccionario
+        db.add(nuevo_usuario)
+        db.commit()
+        return JSONResponse(
+            status_code=201, 
+            content={"mensaje": "Usuario Guardado", "usuario": usuario.model_dump()}
+        )
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(
+            status_code=500, 
+            content={"mensaje": "No fue posible guardar", "Error": str(e)}
+        )
+    finally:
+        db.close()
 
 # ENDPOINT - Actualizar usuario
 @app.put("/usuarios/{id}", response_model=modelUsuario, tags=["Operaciones CRUD"])
