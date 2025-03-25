@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from typing import Optional, List
 from modelsPydantic import modelUsuario
 from modelsPydantic import modelAuth
@@ -39,9 +40,38 @@ def auth(credenciales: modelAuth):
         return {"Aviso": "Usuario no cuenta con permiso"}
 
 # ENDPOINT - Obtener todos los usuarios
-@app.get("/todosUsuarios", dependencies=[Depends(BearerJWT())],response_model=List[modelUsuario], tags=["Operaciones CRUD"])
+@app.get("/todosUsuarios", tags=["Operaciones CRUD"])
 def leer():
-    return usuarios
+    db = Session()
+    try:
+        consulta = db.query(User).all()
+        return JSONResponse(content=jsonable_encoder(consulta))
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(
+            status_code=500, 
+            content={"mensaje": "No fue posible consultar", "Error": str(e)}
+        )
+    finally:
+        db.close()
+
+# ENDPOINT - Obtener un usuario por id
+@app.get("/usuario/{id}", tags=["Operaciones CRUD"])
+def leerOne(id: int):
+    db = Session()
+    try:
+        consulta1 = db.query(User).filter(User.id == id).first()
+        if not consulta1:
+            return JSONResponse(status_code=404,content={"mensaje":"Usuario no encontrado"})
+        return JSONResponse(content=jsonable_encoder(consulta1))
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(
+            status_code=500, 
+            content={"mensaje": "No fue posible consultar", "Error": str(e)}
+        )
+    finally:
+        db.close()
 
 # ENDPOINT - Agregar usuario
 @app.post("/usuarios/", response_model=modelUsuario, tags=["Operaciones CRUD"])
