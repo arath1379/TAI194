@@ -96,18 +96,45 @@ def guardar(usuario: modelUsuario):
 
 # ENDPOINT - Actualizar usuario
 @app.put("/usuarios/{id}", response_model=modelUsuario, tags=["Operaciones CRUD"])
-def actualizar(id: int, usuarioActualizado: modelUsuario):
-    for index, usr in enumerate(usuarios):
-        if usr["id"] == id:
-            usuarios[index] = usuarioActualizado.model_dump()
-            return usuarios[index]
-    raise HTTPException(status_code=400, detail="El usuario no existe")
+def actualizar_usuario(id: int, usuario_actualizado: modelUsuario):
+    db = Session()
+    try:
+        usuario_db = db.query(User).filter(User.id == id).first()
+        if not usuario_db:
+            return JSONResponse(status_code=404, content={"mensaje": "Usuario no encontrado"})
+        
+        for key, value in usuario_actualizado.model_dump().items():
+            setattr(usuario_db, key, value)
+        
+        db.commit()
+        db.refresh(usuario_db)
+        return JSONResponse(content=jsonable_encoder(usuario_db))
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(
+            status_code=500,
+            content={"mensaje": "No fue posible actualizar", "Error": str(e)}
+        )
+    finally:
+        db.close()
 
 # ENDPOINT - Eliminar usuario
 @app.delete("/usuarios/{id}", tags=["Operaciones CRUD"])
-def eliminar(id: int):
-    for index, usr in enumerate(usuarios):
-        if usr["id"] == id:
-            usuarios.pop(index)
-            return {"Mensaje": "Usuario eliminado con éxito"}
-    raise HTTPException(status_code=400, detail="El usuario no existe")
+def eliminar_usuario(id: int):
+    db = Session()
+    try:
+        usuario_db = db.query(User).filter(User.id == id).first()
+        if not usuario_db:
+            return JSONResponse(status_code=404, content={"mensaje": "Usuario no encontrado"})
+        
+        db.delete(usuario_db)
+        db.commit()
+        return JSONResponse(content={"mensaje": "Usuario eliminado con éxito"})
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(
+            status_code=500,
+            content={"mensaje": "No fue posible eliminar", "Error": str(e)}
+        )
+    finally:
+        db.close()
